@@ -49,7 +49,7 @@ describe('MemoryRepository Provenance and Pipeline Version Isolation', () => {
         capturedQueryArgs = { strings, values };
         return [
           {
-            memory_item_id: 'item-1',
+            memoryItemId: 'item-1',
             content: 'Scalable backend tips',
             similarity: 0.89,
           },

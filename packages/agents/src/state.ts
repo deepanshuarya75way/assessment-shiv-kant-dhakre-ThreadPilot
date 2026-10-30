@@ -77,7 +77,7 @@ export interface ValidationResult {
 export interface DuplicateCheckResult {
   isDuplicate: boolean;
   similarityScore: number;
-  similarMemoryItemId: string | null;
+  similarmemoryItemId: string | null;
   checkFailed?: boolean;
   failureReason?: string;
   requiresReview?: boolean;

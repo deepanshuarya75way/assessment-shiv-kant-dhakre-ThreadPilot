@@ -146,7 +146,7 @@ Requirements are organized chronologically by system phase and functional domain
      ```sql
      SELECT m.*, (1 - (e.embedding <=> $1::vector)) AS similarity
      FROM memory_items m
-     JOIN memory_embeddings e ON e.memory_item_id = m.id
+     JOIN memory_embeddings e ON e.memoryItemId = m.id
      WHERE m.workspace_id = $2 AND e.task_type = 'DOCUMENT'
      ORDER BY e.embedding <=> $1::vector ASC
      LIMIT $3;

@@ -343,7 +343,7 @@ model StyleExample {
   id            String     @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
   workspaceId   String     @map("workspace_id") @db.Uuid
   workspace     Workspace  @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
-  memoryItemId  String     @unique @map("memory_item_id") @db.Uuid
+  memoryItemId  String     @unique @map("memoryItemId") @db.Uuid
   memoryItem    MemoryItem @relation(fields: [memoryItemId], references: [id])
   sourcePostId  String?    @map("source_post_id") @db.Uuid
   text          String
@@ -390,7 +390,7 @@ model MemoryItem {
 
 model MemoryEmbedding {
   id              String      @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
-  memoryItemId    String      @map("memory_item_id") @db.Uuid
+  memoryItemId    String      @map("memoryItemId") @db.Uuid
   memoryItem      MemoryItem  @relation(fields: [memoryItemId], references: [id], onDelete: Cascade)
   workspaceId     String      @map("workspace_id") @db.Uuid
   workspace       Workspace   @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
@@ -1211,7 +1211,7 @@ model EditorialFeedback {
   
   isVectorCandidate     Boolean         @default(false) @map("is_vector_candidate")
   indexedToVectorAt     DateTime?       @map("indexed_to_vector_at")
-  memoryItemId          String?         @map("memory_item_id")
+  memoryItemId          String?         @map("memoryItemId")
 
   createdAt             DateTime        @default(now()) @map("created_at")
 

@@ -266,7 +266,7 @@ describe('Historical Post Ingestion to Duplicate Detection Workflow Integration 
     assert.strictEqual(checkedModel, 'gemini-embedding-2');
     // 2. Must detect duplicate
     assert.strictEqual(finalState.dupeCheck?.isDuplicate, true);
-    assert.strictEqual(finalState.dupeCheck?.similarMemoryItemId, 'mem-item-101');
+    assert.strictEqual(finalState.dupeCheck?.similarmemoryItemId, 'mem-item-101');
     assert.strictEqual(finalState.dupeCheck?.similarityScore, 0.9434);
     assert.strictEqual(finalState.status, 'failure');
     assert(finalState.error?.includes('too similar to existing post'));

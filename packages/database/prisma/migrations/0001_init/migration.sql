@@ -161,7 +161,7 @@ CREATE TABLE "user_preferences" (
 CREATE TABLE "style_examples" (
     "id" UUID NOT NULL DEFAULT uuid_generate_v4(),
     "workspace_id" UUID NOT NULL,
-    "memory_item_id" UUID NOT NULL,
+    "memoryItemId" UUID NOT NULL,
     "source_post_id" UUID,
     "text" TEXT NOT NULL,
     "topic" TEXT,
@@ -429,7 +429,7 @@ CREATE UNIQUE INDEX "style_profile_snapshots_workspace_id_version_key" ON "style
 CREATE UNIQUE INDEX "user_preferences_workspace_id_key" ON "user_preferences"("workspace_id");
 
 -- CreateIndex
-CREATE UNIQUE INDEX "style_examples_memory_item_id_key" ON "style_examples"("memory_item_id");
+CREATE UNIQUE INDEX "style_examples_memoryItemId_key" ON "style_examples"("memoryItemId");
 
 -- CreateIndex
 CREATE INDEX "style_examples_workspace_id_topic_idx" ON "style_examples"("workspace_id", "topic");
@@ -525,7 +525,7 @@ ALTER TABLE "user_preferences" ADD CONSTRAINT "user_preferences_workspace_id_fke
 ALTER TABLE "style_examples" ADD CONSTRAINT "style_examples_workspace_id_fkey" FOREIGN KEY ("workspace_id") REFERENCES "workspaces"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "style_examples" ADD CONSTRAINT "style_examples_memory_item_id_fkey" FOREIGN KEY ("memory_item_id") REFERENCES "memory_items"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+ALTER TABLE "style_examples" ADD CONSTRAINT "style_examples_memoryItemId_fkey" FOREIGN KEY ("memoryItemId") REFERENCES "memory_items"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "memory_items" ADD CONSTRAINT "memory_items_workspace_id_fkey" FOREIGN KEY ("workspace_id") REFERENCES "workspaces"("id") ON DELETE CASCADE ON UPDATE CASCADE;

@@ -257,7 +257,7 @@ CREATE TABLE IF NOT EXISTS "editorial_feedbacks" (
     "user_rating" INTEGER,
     "is_vector_candidate" BOOLEAN NOT NULL DEFAULT false,
     "indexed_to_vector_at" TIMESTAMP(3),
-    "memory_item_id" TEXT,
+    "memoryItemId" TEXT,
     "created_at" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
 
     CONSTRAINT "editorial_feedbacks_pkey" PRIMARY KEY ("id")

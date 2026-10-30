@@ -9,6 +9,17 @@ export interface EmbeddingMetadataProvenance {
   embeddingPipelineVersion: string;
 }
 
+export interface FindByKeywordsOptions {
+    limit: number;
+    type?: string;
+  }
+
+  export interface KeywordMatch{
+    memoryItemId: string;
+    content: string;
+
+  }
+
 export interface FindSimilarOptions {
   model: string; // Required: enforces strict coordinate-space isolation
   type?: string;
@@ -88,7 +99,7 @@ export class MemoryRepository {
     await this.db.$executeRaw`
       INSERT INTO memory_embeddings (
         id,
-        memory_item_id,
+        memoryItemId,
         workspace_id,
         model,
         dimensions,
@@ -109,7 +120,7 @@ export class MemoryRepository {
         NOW()
       FROM memory_items mi
       WHERE mi.id = ${memoryItemId}::uuid
-      ON CONFLICT (memory_item_id, model, task_type, pipeline_version)
+      ON CONFLICT (memoryItemId, model, task_type, pipeline_version)
       DO UPDATE SET
         embedding = EXCLUDED.embedding,
         dimensions = EXCLUDED.dimensions,
@@ -127,6 +138,39 @@ export class MemoryRepository {
    *   - taskType: 'DOCUMENT' for asymmetric retrieval queries
    *   - taskType: 'SIMILARITY' for symmetric duplicate detection
    */
+  
+
+async findByKeywords(
+    workspaceId: string,
+    terms: string[],
+    options: FindByKeywordsOptions,
+
+): Promise<KeywordMatch[]>{
+  const cleaned = terms.map((t) => t.trim()).filter(Boolean);
+  if(cleaned.length === 0) return [];
+
+  const likeClauses = cleaned.map(
+    (t) => Prisma.sql`mi.content ILIKE ${'%' + t.replace(/[\\%_]/g, '\\$&') + '%'}`,
+  );
+
+  const rows = await this.db.$queryRaw<
+    {memoryItemId: string; content: string }[]
+  >`
+    SELECT mi.id AS memoryItemId, mi.content
+    FROM memory_items mi
+    WHERE mi.workspace_id = ${workspaceId}::uuid
+    ${options.type? Prisma.sql`AND mi.type = ${options.type}` : Prisma.empty}
+    AND (${Prisma.join(likeClauses, ' OR ')})
+    ORDER BY mi.created_at DESC
+    LIMIT ${options.limit}
+    `;
+
+    return rows.map((r) => ({
+      memoryItemId: r.memoryItemId,
+      content: r.content,
+    }));
+}
+
   async findSimilar(
     workspaceId: string,
     queryEmbedding: number[],
@@ -135,15 +179,15 @@ export class MemoryRepository {
     const { model, type, limit = 10, minSimilarity = 0.7, pipelineVersion, taskType, dimensions } = options;
     const vectorLiteral = `[${queryEmbedding.join(',')}]`;
 
-    type RawResult = { memory_item_id: string; content: string; similarity: number };
+    type RawResult = { memoryItemId: string; content: string; similarity: number };
 
     const results = await this.db.$queryRaw<RawResult[]>`
       SELECT
-        mi.id as memory_item_id,
+        mi.id as memoryItemId,
         mi.content,
         1 - (me.embedding <=> ${vectorLiteral}::vector) as similarity
       FROM memory_embeddings me
-      JOIN memory_items mi ON mi.id = me.memory_item_id
+      JOIN memory_items mi ON mi.id = me.memoryItemId
       WHERE me.workspace_id = ${workspaceId}::uuid
         AND me.model = ${model}
         ${type ? Prisma.sql`AND mi.type = ${type}` : Prisma.empty}
@@ -156,7 +200,7 @@ export class MemoryRepository {
     `;
 
     return results.map((r) => ({
-      memoryItemId: r.memory_item_id,
+      memoryItemId: r.memoryItemId,
       content: r.content,
       similarity: Number(r.similarity),
     }));
@@ -202,7 +246,7 @@ export class MemoryRepository {
         se.topic,
         1 - (me.embedding <=> ${vectorLiteral}::vector) as similarity
       FROM style_examples se
-      JOIN memory_embeddings me ON me.memory_item_id = se.memory_item_id
+      JOIN memory_embeddings me ON me.memoryItemId = se.memoryItemId
       WHERE se.workspace_id = ${workspaceId}::uuid
         AND (se.user_rating IS NULL OR se.user_rating >= 0)
         AND me.model = ${model}
@@ -255,7 +299,7 @@ export class MemoryRepository {
         ARRAY_AGG(DISTINCT me.task_type) FILTER (WHERE me.task_type IS NOT NULL) as existing_task_types
       FROM memory_items mi
       LEFT JOIN memory_embeddings me
-        ON me.memory_item_id = mi.id
+        ON me.memoryItemId = mi.id
        AND me.pipeline_version = ${targetPipelineVersion}
        AND me.model = ${model}
       WHERE mi.workspace_id = ${workspaceId}::uuid

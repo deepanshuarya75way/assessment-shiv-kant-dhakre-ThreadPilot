@@ -330,7 +330,7 @@ describe('Infrastructure-Backed Ingestion -> Embedding -> Retrieval E2E Test (Re
       'Candidate draft must be flagged as duplicate by real pgvector cosine search',
     );
     assert.strictEqual(
-      graphResult.dupeCheck?.similarMemoryItemId,
+      graphResult.dupeCheck?.similarmemoryItemId,
       memoryItem.id,
       'Duplicate must link to the ingested historical MemoryItem',
     );

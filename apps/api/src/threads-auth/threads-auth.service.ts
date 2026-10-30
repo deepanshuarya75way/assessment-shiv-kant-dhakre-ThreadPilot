@@ -20,8 +20,8 @@ export class ThreadsAuthService {
 
     this.oauthService = new ThreadsOAuthService(
       {
-        setex: (key, ttl, val) => this.redis.setex(key, ttl, val),
-        getdel: (key) => this.redis.getdel(key),
+        setex: (key: string, ttl: number, val: string) => this.redis.setex(key, ttl, val),
+        getdel: (key: string) => this.redis.getdel(key),
       },
       {
         apiBaseUrl: this.config.get<string>('THREADS_API_BASE_URL', 'https://graph.threads.net/v1.0'),

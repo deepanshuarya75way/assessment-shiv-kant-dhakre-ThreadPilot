@@ -3,7 +3,11 @@ import crypto from 'crypto';
 import type { PrismaClient } from '@threadpilot/database';
 import { MemoryRepository } from '@threadpilot/database';
 import type { AIProvider } from '@threadpilot/ai';
+import type { CompiledStateGraph } from '@langchain/langgraph';
 import { createLogger } from '@threadpilot/observability';
+// import { extractExactTerms } from './exact-terms';
+
+
 import {
   buildGenerateSystemPrompt,
   buildGenerateUserPrompt,
@@ -28,6 +32,7 @@ import {
 } from '../state';
 
 const logger = createLogger({ service: 'ContentGraph' });
+// const exactTerms = actTerms(StateGraph.topic);
 
 export interface ContentGraphDependencies {
   db: PrismaClient;
@@ -63,7 +68,7 @@ export const DEFAULT_DUPLICATE_POLICY: DuplicatePolicy = {
   minDuplicateSimilarity: 0.9053,
 };
 
-export function createContentGraph(deps: ContentGraphDependencies) {
+export function createContentGraph(deps: ContentGraphDependencies): CompiledStateGraph<any, any, any>{
   const { db, aiProvider, memoryRepo } = deps;
   const policy = deps.duplicatePolicy ?? DEFAULT_DUPLICATE_POLICY;
 
@@ -276,7 +281,7 @@ export function createContentGraph(deps: ContentGraphDependencies) {
 
       if (!embedding || embedding.length === 0) {
         return {
-          dupeCheck: { isDuplicate: false, similarityScore: 0, similarMemoryItemId: null },
+          dupeCheck: { isDuplicate: false, similarityScore: 0, similarmemoryItemId: null },
         };
       }
 
@@ -300,7 +305,7 @@ export function createContentGraph(deps: ContentGraphDependencies) {
         const dupeResult: DuplicateCheckResult = {
           isDuplicate: true,
           similarityScore: topMatch.similarity,
-          similarMemoryItemId: topMatch.memoryItemId,
+          similarmemoryItemId: topMatch.memoryItemId,
         };
         return {
           dupeCheck: dupeResult,
@@ -310,7 +315,7 @@ export function createContentGraph(deps: ContentGraphDependencies) {
       }
 
       return {
-        dupeCheck: { isDuplicate: false, similarityScore: topMatch?.similarity ?? 0, similarMemoryItemId: null },
+        dupeCheck: { isDuplicate: false, similarityScore: topMatch?.similarity ?? 0, similarmemoryItemId: null },
       };
     } catch (err) {
       const errorMsg = err instanceof Error ? err.message : String(err);
@@ -319,7 +324,7 @@ export function createContentGraph(deps: ContentGraphDependencies) {
         dupeCheck: {
           isDuplicate: false,
           similarityScore: 0,
-          similarMemoryItemId: null,
+          similarmemoryItemId: null,
           checkFailed: true,
           failureReason: errorMsg,
           requiresReview: true,
