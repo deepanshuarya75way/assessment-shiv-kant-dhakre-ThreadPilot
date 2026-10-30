@@ -5,7 +5,7 @@ import { MemoryRepository } from '@threadpilot/database';
 import type { AIProvider } from '@threadpilot/ai';
 import type { CompiledStateGraph } from '@langchain/langgraph';
 import { createLogger } from '@threadpilot/observability';
-// import { extractExactTerms } from './exact-terms';
+import { extractExactTerms, mergeRetrievedMemories } from './exact-terms';
 
 
 import {
@@ -119,19 +119,52 @@ export function createContentGraph(deps: ContentGraphDependencies): CompiledStat
         return { retrievedMemoryIds: [], retrievedMemoryTexts: [] };
       }
 
-      const similar = await memoryRepo.findSimilar(state.workspaceId, queryEmbedding, {
-        model: aiProvider.modelName,
-        limit: 5,
-        minSimilarity: 0.65,
-        type: 'POST',
-        taskType: 'DOCUMENT',
-        pipelineVersion: 'v2',
-      });
+      // const similar = await memoryRepo.findSimilar(state.workspaceId, queryEmbedding, {
+      //   model: aiProvider.modelName,
+      //   limit: 5,
+      //   minSimilarity: 0.65,
+      //   type: 'POST',
+      //   taskType: 'DOCUMENT',
+      //   pipelineVersion: 'v2',
+      // });
+
+      // return {
+      //   retrievedMemoryIds: similar.map((s) => s.memoryItemId),
+      //   retrievedMemoryTexts: similar.map((s) => s.content),
+      // };
+
+      const RETRIEVAL_LIMIT = 5;
+
+      const exactTerms =  extractExactTerms(queryText);
+
+      const [similar, exactMatches] = await Promise.all([
+        memoryRepo.findSimilar(state.workspaceId, queryEmbedding, {
+          model: aiProvider.modelName,
+          limit: RETRIEVAL_LIMIT,
+          minSimilarity: 0.65,
+          type: 'POST',
+          taskType: 'DOCUMENT',
+          pipelineVersion: 'v2',
+        }),
+        exactTerms.length > 0
+        ? memoryRepo.findByKeywords(state.workspaceId, exactTerms, {
+          limit: Math.ceil(RETRIEVAL_LIMIT/2),
+          type: 'POST',
+        
+        })
+        : Promise.resolve([]),
+      ]);
+
+      const finalMemories = mergeRetrievedMemories(
+        exactMatches,
+        similar,
+        RETRIEVAL_LIMIT,
+      );
 
       return {
-        retrievedMemoryIds: similar.map((s) => s.memoryItemId),
-        retrievedMemoryTexts: similar.map((s) => s.content),
-      };
+        retrievedMemoryIds: finalMemories.map((m) => m.memoryItemId),
+        retrievedMemoryTexts: finalMemories.map((m) => m.content),
+      }
     } catch (err) {
       logger.warn({ err }, 'Failed to retrieve semantic memories, proceeding without memories');
       return { retrievedMemoryIds: [], retrievedMemoryTexts: [] };

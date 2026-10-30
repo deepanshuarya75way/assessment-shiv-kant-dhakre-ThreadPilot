@@ -9,19 +9,19 @@
     "test": "node --experimental-strip-types --test test/duplicate-calibration.spec.ts test/engagement-agents.spec.ts",
     "lint": "tsc --noEmit"
   },
-
   "dependencies": {
     "@langchain/langgraph": "^0.2.0",
     "@threadpilot/ai": "workspace:*",
+    "@threadpilot/config": "workspace:*",
     "@threadpilot/database": "workspace:*",
     "@threadpilot/observability": "workspace:*",
     "@threadpilot/prompts": "workspace:*",
     "@threadpilot/types": "workspace:*",
-    "@threadpilot/config": "workspace:*",
     "zod": "^3.23.8"
   },
   "devDependencies": {
     "@types/node": "^22.0.0",
-    "typescript": "^5.5.4"
+    "typescript": "^5.5.4",
+    "vitest": "^5.0.5"
   }
 }

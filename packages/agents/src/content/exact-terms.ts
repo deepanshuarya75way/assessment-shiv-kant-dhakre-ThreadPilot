@@ -22,20 +22,20 @@ export function extractExactTerms(text: string, max = 5): string[] {
   return [...terms].slice(0, max);
 }
 
-// export interface RetrievedMemory {
-//   memoryItemId: string;
-//   content: string;
-// }
+export interface RetrievedMemory {
+  memoryItemId: string;
+  content: string;
+}
 
-// export function mergeRetrievedMemories(
-//   exactMatches: RetrievedMemory[],
-//   semanticMatches: RetrievedMemory[],
-//   limit: number,
-// ): RetrievedMemory[] {
-//   const merged = new Map<string, RetrievedMemory>();
-//   for(const m of exactMatches) merged.set(m.memoryItemId, m);
-//   for(const s of semanticMatches) {
-//     if(!merged.has(s.memoryItemId)) merged.set(s.memoryItemId, s);
-//   }
-//   return [...merged.values()].slice(0,limit);
-// }
+export function mergeRetrievedMemories(
+  exactMatches: RetrievedMemory[],
+  semanticMatches: RetrievedMemory[],
+  limit: number,
+): RetrievedMemory[] {
+  const merged = new Map<string, RetrievedMemory>();
+  for(const m of exactMatches) merged.set(m.memoryItemId, m);
+  for(const s of semanticMatches) {
+    if(!merged.has(s.memoryItemId)) merged.set(s.memoryItemId, s);
+  }
+  return [...merged.values()].slice(0,limit);
+}
